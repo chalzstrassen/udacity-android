@@ -1,6 +1,7 @@
 package com.example.android.sunshine.app;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
@@ -16,7 +17,6 @@ import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.util.Log;
 import android.net.Uri;
-import android.widget.Toast;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -63,7 +63,10 @@ public class ForecastFragment extends Fragment {
                 @Override
                 public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                     String forecast = mForecastAdapter.getItem(position);
-                    Toast.makeText(getActivity(), forecast, Toast.LENGTH_SHORT).show();
+//                    Toast.makeText(getActivity(), forecast, Toast.LENGTH_SHORT).show();
+                    Intent displayDetail = new Intent(getActivity(), DetailActivity.class)
+                            .putExtra(Intent.EXTRA_TEXT, forecast);
+                    startActivity(displayDetail);
                 }
             });
         } catch (Exception e) {
@@ -175,8 +178,7 @@ public class ForecastFragment extends Fragment {
         long roundedHigh = Math.round(high);
         long roundedLow = Math.round(low);
 
-        String highLowStr = roundedHigh + "/" + roundedLow;
-        return highLowStr;
+        return roundedHigh + "/" + roundedLow;
     }
 
     /**

@@ -89,7 +89,6 @@ public class ForecastFragment extends Fragment {
             new FetchWeatherTask().execute("94043");
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 

@@ -2,7 +2,9 @@ package com.example.android.sunshine.app;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
 import android.text.format.Time;
@@ -50,7 +52,9 @@ public class ForecastFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        AsyncTask<String, Void, String[]> task = new FetchWeatherTask().execute("94043");
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        Log.v("Shared Preferences: ", preferences.getAll().toString());
+        AsyncTask<String, Void, String[]> task = new FetchWeatherTask().execute(preferences.getString("location", "94043"));
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
@@ -86,10 +90,23 @@ public class ForecastFragment extends Fragment {
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
             // new FetchWeatherTask().execute("http://api.openweathermap.org/data/2.5/forecast/daily?q=94043&mode=json&units=metric&cnt=7&appid=db693a00da1ce2621cae968dbed6102e");
-            new FetchWeatherTask().execute("94043");
+            updateWeather();
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+            new FetchWeatherTask().execute(preferences.getString("location", "94043"));
             return true;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        updateWeather();
+    }
+
+    private void updateWeather() {
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        new FetchWeatherTask().execute(preferences.getString("location", "94043"));
     }
 
     private class FetchWeatherTask extends AsyncTask<String, Void, String[]> {

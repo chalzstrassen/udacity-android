@@ -76,7 +76,6 @@ public class ForecastFragment extends Fragment {
         } catch (Exception e) {
             Log.e("Exception", "ForecastFragment:onCreateView.");
         }
-
         return rootView;
     }
 
@@ -91,8 +90,6 @@ public class ForecastFragment extends Fragment {
         if (id == R.id.action_refresh) {
             // new FetchWeatherTask().execute("http://api.openweathermap.org/data/2.5/forecast/daily?q=94043&mode=json&units=metric&cnt=7&appid=db693a00da1ce2621cae968dbed6102e");
             updateWeather();
-            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-            new FetchWeatherTask().execute(preferences.getString("location", "94043"));
             return true;
         }
         return super.onOptionsItemSelected(item);
@@ -106,7 +103,26 @@ public class ForecastFragment extends Fragment {
 
     private void updateWeather() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        new FetchWeatherTask().execute(preferences.getString("location", "94043"));
+        AsyncTask<String, Void, String[]> task = new FetchWeatherTask().execute(preferences.getString("location", "94043"));
+        ListView listView = (ListView) getView().findViewById(R.id.listview_forecast);
+        try {
+            String[] result = task.get();
+            mForecastAdapter = new ArrayAdapter<String>(getActivity(),
+                    R.layout.list_item_forecast, result);
+            listView.setAdapter(mForecastAdapter);
+            listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                @Override
+                public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                    String forecast = mForecastAdapter.getItem(position);
+//                    Toast.makeText(getActivity(), forecast, Toast.LENGTH_SHORT).show();
+                    Intent displayDetail = new Intent(getActivity(), DetailActivity.class)
+                            .putExtra(Intent.EXTRA_TEXT, forecast);
+                    startActivity(displayDetail);
+                }
+            });
+        } catch (Exception e) {
+            Log.e("Exception", "ForecastFragment:updateWeather.");
+        }
     }
 
     private class FetchWeatherTask extends AsyncTask<String, Void, String[]> {

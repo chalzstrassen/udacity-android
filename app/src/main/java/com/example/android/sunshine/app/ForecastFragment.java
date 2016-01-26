@@ -126,7 +126,7 @@ public class ForecastFragment extends Fragment {
     }
 
     private class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
-        private static final String appId = "db693a00da1ce2621cae968dbed6102e";
+        private static final String appId = "<openapi key here>";
 
         @Override
         protected void onPostExecute(String[] strings) {
@@ -134,11 +134,11 @@ public class ForecastFragment extends Fragment {
                     R.layout.list_item_forecast, strings);
         }
 
-        protected String[] doInBackground(String... postcode) {
+        protected String[] doInBackground(String... args) {
             Uri.Builder uri = new Uri.Builder();
             uri.scheme("http");
             uri.path("//api.openweathermap.org/data/2.5/forecast/daily");
-            uri.appendQueryParameter("q", postcode[0]);
+            uri.appendQueryParameter("q", args[0]);
             uri.appendQueryParameter("mode", "json");
             uri.appendQueryParameter("units", "metric");
             uri.appendQueryParameter("cnt","7");

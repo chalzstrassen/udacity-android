@@ -51,6 +51,17 @@
         <item>-1</item>
     </string-array>
 
+    <string-array name="temperature_units">
+        <item>C</item>
+        <item>F</item>
+        <item>K</item>
+    </string-array>
+
+    <string-array name="temperature_unit_titles">
+        <item>Celsius</item>
+        <item>Fahrenheit</item>
+        <item>Kelvin</item>
+    </string-array>
     <string name="pref_title_system_sync_settings">System sync settings</string>
 
     <!-- Example settings for Notifications -->

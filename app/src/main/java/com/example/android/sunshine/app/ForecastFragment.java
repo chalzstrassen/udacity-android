@@ -54,7 +54,8 @@ public class ForecastFragment extends Fragment {
                              Bundle savedInstanceState) {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         Log.v("Shared Preferences: ", preferences.getAll().toString());
-        AsyncTask<String, Void, String[]> task = new FetchWeatherTask().execute(preferences.getString("location", "94043"));
+        AsyncTask<String, Void, String[]> task = new FetchWeatherTask().execute(preferences.getString("location", "94043"),
+                preferences.getString("temp_units", "C"));
 
         View rootView = inflater.inflate(R.layout.fragment_main, container, false);
         ListView listView = (ListView) rootView.findViewById(R.id.listview_forecast);
@@ -103,7 +104,8 @@ public class ForecastFragment extends Fragment {
 
     private void updateWeather() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
-        AsyncTask<String, Void, String[]> task = new FetchWeatherTask().execute(preferences.getString("location", "94043"));
+        AsyncTask<String, Void, String[]> task = new FetchWeatherTask().execute(preferences.getString("location", "94043"),
+                preferences.getString("temp_units", "C"));
         ListView listView = (ListView) getView().findViewById(R.id.listview_forecast);
         try {
             String[] result = task.get();
@@ -126,7 +128,7 @@ public class ForecastFragment extends Fragment {
     }
 
     private class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
-        private static final String appId = "<openapi key here>";
+        private static final String appId = "<openweather api key here>";
 
         @Override
         protected void onPostExecute(String[] strings) {
@@ -140,7 +142,13 @@ public class ForecastFragment extends Fragment {
             uri.path("//api.openweathermap.org/data/2.5/forecast/daily");
             uri.appendQueryParameter("q", args[0]);
             uri.appendQueryParameter("mode", "json");
-            uri.appendQueryParameter("units", "metric");
+            String unit = args[1];
+            Log.v("Temperature unit: ", unit);
+            if (args[1].equals("C")) {
+                uri.appendQueryParameter("units", "metric");
+            } else if (args[1].equals("F")) {
+                uri.appendQueryParameter("units", "imperial");
+            }
             uri.appendQueryParameter("cnt","7");
             uri.appendQueryParameter("appid", appId);
             Log.v("Built uri: ", uri.build().toString());
@@ -172,7 +180,7 @@ public class ForecastFragment extends Fragment {
                 }
                 forecastJsonStr = buffer.toString();
                 Log.v("Returned json string: ", forecastJsonStr);
-                forecastArr = getWeatherDataFromJson(forecastJsonStr, 7);
+                forecastArr = getWeatherDataFromJson(forecastJsonStr, 7, unit);
             } catch (IOException e) {
                 Log.e("ForecastFragment", "Error", e);
                 return null;
@@ -205,12 +213,13 @@ public class ForecastFragment extends Fragment {
     /**
      * Prepare the weather high/lows for presentation.
      */
-    private String formatHighLows(double high, double low) {
+    private String formatHighLows(double high, double low, String unit) {
         // For presentation, assume the user doesn't care about tenths of a degree.
+        final String DEG  = " \u00b0";
         long roundedHigh = Math.round(high);
         long roundedLow = Math.round(low);
 
-        return roundedHigh + "/" + roundedLow;
+        return roundedHigh + DEG + unit +  "/" + roundedLow + DEG + unit;
     }
 
     /**
@@ -220,7 +229,7 @@ public class ForecastFragment extends Fragment {
      * Fortunately parsing is easy:  constructor takes the JSON string and converts it
      * into an Object hierarchy for us.
      */
-    private String[] getWeatherDataFromJson(String forecastJsonStr, int numDays)
+    private String[] getWeatherDataFromJson(String forecastJsonStr, int numDays, String unit)
             throws JSONException {
 
         // These are the names of the JSON objects that need to be extracted.
@@ -279,7 +288,7 @@ public class ForecastFragment extends Fragment {
             double high = temperatureObject.getDouble(OWM_MAX);
             double low = temperatureObject.getDouble(OWM_MIN);
 
-            highAndLow = formatHighLows(high, low);
+            highAndLow = formatHighLows(high, low, unit);
             resultStrs[i] = day + " - " + description + " - " + highAndLow;
         }
         return resultStrs;

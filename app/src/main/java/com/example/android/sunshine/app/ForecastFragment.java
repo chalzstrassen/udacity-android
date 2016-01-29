@@ -25,9 +25,9 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.io.BufferedReader;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.concurrent.ExecutionException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -92,6 +92,13 @@ public class ForecastFragment extends Fragment {
             // new FetchWeatherTask().execute("http://api.openweathermap.org/data/2.5/forecast/daily?q=94043&mode=json&units=metric&cnt=7&appid=db693a00da1ce2621cae968dbed6102e");
             updateWeather();
             return true;
+        } else if (id == R.id.action_view_map) {
+            try {
+                showMap();
+            } catch (Exception e) {
+                Log.e("View map: ", "Error in showMap method");
+            }
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -101,7 +108,14 @@ public class ForecastFragment extends Fragment {
         super.onStart();
         updateWeather();
     }
-
+    private void showMap() throws URISyntaxException {
+        Intent intent = new Intent(Intent.ACTION_VIEW);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        intent.setData(Uri.parse("geo:0,0?q=" + preferences.getString("location", "94042")));
+        if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
     private void updateWeather() {
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getActivity());
         AsyncTask<String, Void, String[]> task = new FetchWeatherTask().execute(preferences.getString("location", "94043"),
@@ -155,7 +169,7 @@ public class ForecastFragment extends Fragment {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
 
-            String forecastJsonStr = null;
+            String forecastJsonStr;
             String[] forecastArr;
             try {
                 URL url = new URL(uri.build().toString());

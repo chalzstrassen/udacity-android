@@ -5,4 +5,8 @@
         android:title="@string/refresh_label"
         android:orderInCategory="100"
         app:showAsAction="never" />
+    <item android:id="@+id/action_view_map"
+        android:title="@string/action_map"
+        android:orderInCategory="101"
+        app:showAsAction="never" />
 </menu>

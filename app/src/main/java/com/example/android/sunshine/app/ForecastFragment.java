@@ -1,6 +1,5 @@
 package com.example.android.sunshine.app;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -142,7 +141,7 @@ public class ForecastFragment extends Fragment {
     }
 
     private class FetchWeatherTask extends AsyncTask<String, Void, String[]> {
-        private static final String appId = "<openweather api key here>";
+        private static final String appId = "<open weather api key here>";
 
         @Override
         protected void onPostExecute(String[] strings) {
